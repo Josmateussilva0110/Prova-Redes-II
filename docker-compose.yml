@@ -29,14 +29,14 @@ services:
     command: >
       sh -c "apt update && apt install -y apache2 && echo '<h1>Bem-vindo a Empresa A</h1>' > /var/www/html/index.html && apache2ctl -D FOREGROUND"
 
-  # Servidor DNS Sub-rede A
+# Servidor DNS Sub-rede A
   dns_a:
     image: ubuntu:latest
     networks:
       subnet_a:
         ipv4_address: 10.0.0.11
     command: >
-      sh -c "apt update && apt install -y bind9 && service bind9 start"
+      sh -c "apt update && apt install -y bind9 && echo 'zone \"empresa-a.com\" { type master; file \"/etc/bind/db.empresa-a\"; };' >> /etc/bind/named.conf.local && echo 'empresa-a.com. IN A 10.0.0.10' > /etc/bind/db.empresa-a && service bind9 restart"
 
   # Hosts da Sub-rede B
   host1_b:
@@ -66,14 +66,15 @@ services:
     command: >
       sh -c "apt update && apt install -y apache2 && echo '<h1>Bem-vindo a Empresa B</h1>' > /var/www/html/index.html && apache2ctl -D FOREGROUND"
 
-  # Servidor DNS Sub-rede B
+# Servidor DNS Sub-rede B
   dns_b:
     image: ubuntu:latest
     networks:
       subnet_b:
         ipv4_address: 20.0.0.11
     command: >
-      sh -c "apt update && apt install -y bind9 && service bind9 start"
+      sh -c "apt update && apt install -y bind9 && echo 'zone \"empresa-b.com\" { type master; file \"/etc/bind/db.empresa-b\"; };' >> /etc/bind/named.conf.local && echo 'empresa-b.com. IN A 20.0.0.10' > /etc/bind/db.empresa-b && service bind9 restart"
+
 
   # Firewall (roteador entre sub-redes) com servidor DHCP
   firewall:
