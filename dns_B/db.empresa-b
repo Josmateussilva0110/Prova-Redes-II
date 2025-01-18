@@ -1,11 +1,13 @@
 $TTL 604800
 @   IN  SOA empresa-b.com. root.empresa-b.com. (
-            3        ; Serial (incremente este número a cada alteração)
+            4        ; Serial (incremente este número a cada alteração)
             604800   ; Refresh
             86400    ; Retry
             2419200  ; Expire
             604800 ) ; Minimum TTL
 ;
-@       IN  NS      ns1.empresa-b.com.
-@       IN  A       192.168.1.100     ; Endereço IP do domínio principal
-ns1     IN  A       192.168.1.1       ; Endereço IP do servidor DNS
+@       IN  NS      ns1.empresa-b.com.    ; Nome do servidor DNS
+@       IN  A       20.0.0.11             ; Endereço IP do domínio principal
+ns1     IN  A       20.0.0.11             ; Endereço IP do servidor DNS
+host1   IN  A       20.0.0.100            ; Exemplo de host na sub-rede B
+host2   IN  A       20.0.0.101            ; Exemplo de outro host na sub-rede B
