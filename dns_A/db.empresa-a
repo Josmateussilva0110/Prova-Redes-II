@@ -1,0 +1,11 @@
+$TTL 604800
+@   IN  SOA empresa-a.com. root.empresa-a.com. (
+            1        ; Serial (incremente este número a cada alteração)
+            604800   ; Refresh
+            86400    ; Retry
+            2419200  ; Expire
+            604800 ) ; Minimum TTL
+;
+@       IN  NS      ns1.empresa-a.com.    ; Nome do servidor DNS
+@       IN  A       192.168.1.200         ; Endereço IP do domínio principal
+ns1     IN  A       192.168.1.2           ; Endereço IP do servidor DNS

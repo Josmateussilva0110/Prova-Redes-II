@@ -1,93 +1,62 @@
 version: '3.9'
 
 services:
-  # Hosts da Sub-rede A
-  host1_a:
-    image: ubuntu:latest
-    networks:
-      subnet_a:
-        ipv4_address: 10.0.0.2
-    command: ["sleep", "infinity"]
-
-  host2_a:
-    image: ubuntu:latest
-    networks:
-      subnet_a:
-        ipv4_address: 10.0.0.3
-    command: ["sleep", "infinity"]
-
-  # Servidor Web Sub-rede A
+  # Servidores Web Sub-rede A
   webserver_a:
-    image: ubuntu:latest
+    build:
+      context: ./webserver_A
     networks:
       subnet_a:
         ipv4_address: 10.0.0.10
-    volumes:
-      - ./html/empresa-a:/var/www/html
     ports:
-    - "8080:80"  # Mapeando a porta 80 do contêiner para a 8080 no host
-    command: >
-      sh -c "apt update && apt install -y apache2 && echo '<h1>Bem-vindo a Empresa A</h1>' > /var/www/html/index.html && apache2ctl -D FOREGROUND"
+      - "8080:80"
 
-# Servidor DNS Sub-rede A
-  dns_a:
-    image: ubuntu:latest
-    networks:
-      subnet_a:
-        ipv4_address: 10.0.0.11
-    command: >
-      sh -c "apt update && apt install -y bind9 && echo 'zone \"empresa-a.com\" { type master; file \"/etc/bind/db.empresa-a\"; };' >> /etc/bind/named.conf.local && echo 'empresa-a.com. IN A 10.0.0.10' > /etc/bind/db.empresa-a && service bind9 restart"
-
-  # Hosts da Sub-rede B
-  host1_b:
-    image: ubuntu:latest
-    networks:
-      subnet_b:
-        ipv4_address: 20.0.0.2
-    command: ["sleep", "infinity"]
-
-  host2_b:
-    image: ubuntu:latest
-    networks:
-      subnet_b:
-        ipv4_address: 20.0.0.3
-    command: ["sleep", "infinity"]
-
-  # Servidor Web Sub-rede B
+  # Servidores Web Sub-rede B
   webserver_b:
-    image: ubuntu:latest
+    build:
+      context: ./webserver_B
     networks:
       subnet_b:
         ipv4_address: 20.0.0.10
-    volumes:
-      - ./html/empresa-b:/var/www/html
     ports:
-    - "8081:80"  # Mapeando a porta 80 do contêiner para a 8080 no host
-    command: >
-      sh -c "apt update && apt install -y apache2 && echo '<h1>Bem-vindo a Empresa B</h1>' > /var/www/html/index.html && apache2ctl -D FOREGROUND"
+      - "8081:80"
 
-# Servidor DNS Sub-rede B
+  # Servidor DNS Sub-rede A
+  dns_a:
+    build:
+      context: ./dns_A
+    networks:
+      subnet_a:
+        ipv4_address: 10.0.0.11
+    ports:
+      - "5355:53/udp"  # Porta para DNS
+    cap_add:
+      - NET_ADMIN
+
+  # Servidor DNS Sub-rede B
   dns_b:
-    image: ubuntu:latest
+    build:
+      context: ./dns_B
     networks:
       subnet_b:
         ipv4_address: 20.0.0.11
-    command: >
-      sh -c "apt update && apt install -y bind9 && echo 'zone \"empresa-b.com\" { type master; file \"/etc/bind/db.empresa-b\"; };' >> /etc/bind/named.conf.local && echo 'empresa-b.com. IN A 20.0.0.10' > /etc/bind/db.empresa-b && service bind9 restart"
+    ports:
+      - "5356:53/udp"
+    cap_add:
+      - NET_ADMIN
 
-
-  # Firewall (roteador entre sub-redes) com servidor DHCP
+  # Firewall e DHCP
   firewall:
-    image: ubuntu:latest
+    build:
+      context: ./firewall
     networks:
       subnet_a:
       subnet_b:
     cap_add:
       - NET_ADMIN
-    command: >
-      sh -c "apt update && apt install -y iptables isc-dhcp-server && service isc-dhcp-server start && sleep infinity"
-    volumes:
-      - ./dhcpd.conf:/etc/dhcp/dhcpd.conf  # Montando o arquivo de configuração do DHCP
+    ports:
+      - "67:67/udp"  # Porta DHCP
+      - "68:68/udp"
 
 networks:
   subnet_a:
