@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 
-# Instalar o Bind9
-RUN apt-get update && apt-get install -y bind9
+# Atualizar os repositórios e instalar o Bind9 e dnsutils
+RUN apt-get update && apt-get install -y bind9 dnsutils
 
 # Copiar os arquivos de configuração para os locais adequados
 COPY named.conf.local /etc/bind/
