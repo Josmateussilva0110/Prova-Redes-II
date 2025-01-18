@@ -57,6 +57,37 @@ services:
     ports:
       - "67:67/udp"  # Porta DHCP
       - "68:68/udp"
+  
+  # Hosts Sub-rede A
+  host1_a:
+    image: ubuntu:latest
+    networks:
+      subnet_a:
+        ipv4_address: 10.0.0.100
+    command: tail -f /dev/null  # Mantém o container ativo
+
+  host2_a:
+    image: ubuntu:latest
+    networks:
+      subnet_a:
+        ipv4_address: 10.0.0.101
+    command: tail -f /dev/null
+  
+
+  # Hosts Sub-rede B
+  host1_b:
+    image: ubuntu:latest
+    networks:
+      subnet_b:
+        ipv4_address: 20.0.0.100
+    command: tail -f /dev/null
+
+  host2_b:
+    image: ubuntu:latest
+    networks:
+      subnet_b:
+        ipv4_address: 20.0.0.101
+    command: tail -f /dev/null
 
 networks:
   subnet_a:
