@@ -78,6 +78,10 @@ services:
         iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT &&
         iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT &&
 
+        # Permitir tráfego ICMP entre as sub-redes
+        iptables -A FORWARD -s 10.0.0.0/24 -d 20.0.0.0/24 -p icmp -j ACCEPT &&
+        iptables -A FORWARD -s 20.0.0.0/24 -d 10.0.0.0/24 -p icmp -j ACCEPT &&
+
         # Manter serviço DHCP
         service isc-dhcp-server start &&
         tail -f /dev/null
