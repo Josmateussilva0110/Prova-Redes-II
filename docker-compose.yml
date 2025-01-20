@@ -64,23 +64,31 @@ services:
         echo 'INTERFACESv4=\"eth0 eth1\"' > /etc/default/isc-dhcp-server &&
         sysctl -w net.ipv4.ip_forward=1 &&
 
-        # Limpar regras existentes
-        iptables -F &&
-        iptables -X &&
-        iptables -t nat -F &&
-        iptables -t nat -X &&
+       # Limpar regras existentes
+        iptables -F
+        iptables -X
+        iptables -t nat -F
+        iptables -t nat -X
 
         # Regras NAT para as sub-redes
-        iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE &&
-        iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE &&
+        iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+        iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
 
         # Permitir tráfego entre as sub-redes
-        iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT &&
-        iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT &&
+        iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
+        iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
 
-        # Permitir tráfego ICMP entre as sub-redes
-        iptables -A FORWARD -s 10.0.0.0/24 -d 20.0.0.0/24 -p icmp -j ACCEPT &&
-        iptables -A FORWARD -s 20.0.0.0/24 -d 10.0.0.0/24 -p icmp -j ACCEPT &&
+        # Permitir ICMP entre sub-rede A e servidores web/DNS da sub-rede B
+        iptables -A FORWARD -s 10.0.0.0/24 -d 20.0.0.10 -p icmp -j ACCEPT
+        iptables -A FORWARD -s 10.0.0.0/24 -d 20.0.0.11 -p icmp -j ACCEPT
+
+        # Permitir ICMP entre sub-rede B e servidores web/DNS da sub-rede A
+        iptables -A FORWARD -s 20.0.0.0/24 -d 10.0.0.10 -p icmp -j ACCEPT
+        iptables -A FORWARD -s 20.0.0.0/24 -d 10.0.0.11 -p icmp -j ACCEPT
+
+        # Bloquear ICMP genérico entre hosts que não sejam servidores
+        iptables -A FORWARD -s 10.0.0.0/24 -d 20.0.0.0/24 -p icmp -j DROP
+        iptables -A FORWARD -s 20.0.0.0/24 -d 10.0.0.0/24 -p icmp -j DROP
 
         # Manter serviço DHCP
         service isc-dhcp-server start &&
